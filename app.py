@@ -24,10 +24,11 @@ def check_website(url, phone_number, duration_in_seconds):
             response = requests.get(url, timeout=5)
             if response.status_code != 200:
                 raise ValueError("Website down")
-        except Exception:
+        except Exception as e:
+            print(f"Error in website check: {e}")
             send_notification(phone_number, f"The website {url} is down!")
             break
-        time.sleep(600)  # Check every 10 minutes
+        time.sleep(600)
 
 def send_notification(phone_number, message):
     # Sending SMS
@@ -49,12 +50,19 @@ def monitor_website():
     data = request.json
     url = data.get('url')
     phone_number = data.get('phone_number')
-    duration_hours = int(data.get('duration'))
-    duration_seconds = duration_hours * 3600  # Convert hours to seconds
-    
-    # Starting a new thread for website monitoring
-    threading.Thread(target=check_website, args=(url, phone_number, duration_seconds)).start()
-    return jsonify({"message": "Website monitoring started"}), 200
+    duration = data.get('duration')
+
+    if not url or not phone_number or not duration:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    try:
+        duration_hours = int(duration)
+        duration_seconds = duration_hours * 3600
+        threading.Thread(target=check_website, args=(url, phone_number, duration_seconds)).start()
+        return jsonify({"message": "Website monitoring started"}), 200
+    except ValueError:
+        return jsonify({"error": "Invalid duration value"}), 400
+
 
 if __name__ == '__main__':
     app.run(debug=True)
