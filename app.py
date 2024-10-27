@@ -7,9 +7,9 @@ import time
 app = Flask(__name__)
 
 # Twilio configuration
-TWILIO_SID = 'your_twilio_sid'
-TWILIO_AUTH_TOKEN = 'your_twilio_auth_token'
-TWILIO_PHONE = 'your_twilio_phone_number'
+TWILIO_SID = 'USa472d600a3e12139f46d52e5bcb63fa2'
+TWILIO_AUTH_TOKEN = 'cbffbf8e870244f47a44f60e8ab1668e'
+TWILIO_PHONE = '+15108580913'
 
 client = Client(TWILIO_SID, TWILIO_AUTH_TOKEN)
 
