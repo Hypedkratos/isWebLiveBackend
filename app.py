@@ -3,15 +3,19 @@ from twilio.rest import Client
 import requests
 import threading
 import time
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = Flask(__name__)
 
 # Twilio configuration
-TWILIO_SID = 'USa472d600a3e12139f46d52e5bcb63fa2'
-TWILIO_AUTH_TOKEN = 'cbffbf8e870244f47a44f60e8ab1668e'
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
 TWILIO_PHONE = '+15108580913'
 
-client = Client(TWILIO_SID, TWILIO_AUTH_TOKEN)
+client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
 def check_website(url, phone_number, duration_in_seconds):
     end_time = time.time() + duration_in_seconds
