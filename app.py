@@ -66,13 +66,12 @@ def monitor_website():
 
     return jsonify({"message": "Website monitoring started"}), 200
 
-
+@app.route('/stop_monitoring', methods=['POST'])
 def stop_monitoring():
     data = request.json
     phone_number = data.get('phone_number')
 
     if phone_number in monitoring_threads:
-        # You might need to implement a more graceful shutdown
         thread = monitoring_threads[phone_number]
         thread.join(timeout=1)  # Wait for the thread to finish
         del monitoring_threads[phone_number]
