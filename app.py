@@ -4,11 +4,17 @@ import requests
 import threading
 import time
 from dotenv import load_dotenv
+from flask_cors import CORS
 import os
 
 load_dotenv()
 
 app = Flask(__name__)
+
+CORS(app)
+
+# dictionary to mange threads
+monitoring_threads = {}
 
 # Twilio configuration
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
@@ -50,19 +56,29 @@ def monitor_website():
     data = request.json
     url = data.get('url')
     phone_number = data.get('phone_number')
-    duration = data.get('duration')
+    duration_hours = int(data.get('duration'))
+    duration_seconds = duration_hours * 3600  # Convert hours to seconds
 
-    if not url or not phone_number or not duration:
-        return jsonify({"error": "Missing required fields"}), 400
+    # Start monitoring in a new thread
+    thread = threading.Thread(target=check_website, args=(url, phone_number, duration_seconds))
+    monitoring_threads[phone_number] = thread
+    thread.start()
 
-    try:
-        duration_hours = int(duration)
-        duration_seconds = duration_hours * 3600
-        threading.Thread(target=check_website, args=(url, phone_number, duration_seconds)).start()
-        return jsonify({"message": "Website monitoring started"}), 200
-    except ValueError:
-        return jsonify({"error": "Invalid duration value"}), 400
+    return jsonify({"message": "Website monitoring started"}), 200
 
+
+def stop_monitoring():
+    data = request.json
+    phone_number = data.get('phone_number')
+
+    if phone_number in monitoring_threads:
+        # You might need to implement a more graceful shutdown
+        thread = monitoring_threads[phone_number]
+        thread.join(timeout=1)  # Wait for the thread to finish
+        del monitoring_threads[phone_number]
+        return jsonify({"message": "Monitoring stopped"}), 200
+    else:
+        return jsonify({"message": "No monitoring found for this phone number"}), 404
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')

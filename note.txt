@@ -1,0 +1,4 @@
+#use this to run the app in dev mode
+
+export FLASK_ENV=development
+python app.py
