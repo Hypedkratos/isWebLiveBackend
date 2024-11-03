@@ -30,11 +30,15 @@ def check_website(url, phone_number, duration_in_seconds):
             response = requests.get(url, timeout=5)
             if response.status_code != 200:
                 raise ValueError("Website down")
-        except Exception as e:
-            print(f"Error in website check: {e}")
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            print(f"Connection error in website check: {e}")
             send_notification(phone_number, f"The website {url} is down!")
             break
-        time.sleep(600)
+        except Exception as e:
+            print(f"Error in website check: {e}")
+            send_notification(phone_number, f"The website {url} encountered an error: {e}")
+            break
+        time.sleep(60)
 
 def send_notification(phone_number, message):
     # Sending SMS
